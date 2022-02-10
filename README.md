@@ -3,9 +3,9 @@
 - [Overview](#Overview)
 - [Specification](#Specification)
 - [Impementation](#Implementaion)
-  - [Step 1: Creating API endpoints](#Step1: Creating API endpoints)
-  - [Step2: Creating Boba Faucet Contract](#Step2: Creating Boba Faucet Contract)
-  - [Step3: Funding Turing Helper Contract](#Step3: Funding Turing Helper Contract)
+  * [Step 1: Creating API endpoints](#Step1--Creating-API-endpoints)
+  * [Step2: Creating Boba Faucet Contract](#Step2--Creating-Boba-Faucet-Contract)
+  * [Step3: Funding Turing Helper Contract](#Step3--Funding-Turing-Helper-Contract)
 
 ## Overview
 
@@ -22,6 +22,7 @@ This procedure takes place in five steps:
 3. Geth sends the request to backend and retrieves the result
 4. Geth atomically revises the calldata
 5. User gets the result
+<img width="873" alt="image" src="https://user-images.githubusercontent.com/46272347/153475813-f4ffd103-3b95-4df7-a951-a321b84ff34a.png">
 
 ## Implementation
 
@@ -118,7 +119,7 @@ contract BobaFaucet is Ownable {
     ) external {
         require(BobaClaimRecords[msg.sender] + waitingPeriod < block.timestamp, 'Invalid request');
 				
-				// The key is hashed
+        // The key is hashed
         bytes32 hashedKey = keccak256(abi.encodePacked(_key));
         uint256 result = _verifyKey(_uuid, hashedKey);
 
