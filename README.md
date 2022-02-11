@@ -17,12 +17,88 @@ Before claiming the token, users have to answer the CAPTCHA. The answer is hashe
 
 This procedure takes place in five steps:
 
-1. User queries the CAPTCHA image and UUID
-2. User sends the transaction to the contract with UUID and CAPTCHA answer
-3. Geth sends the request to backend and retrieves the result
+1. User gets the CAPTCHA image and UUID of the image
+
+   The API GET request is sent to `https://api-turing.boba.network/get.catcha` on the frontend. The returned payload is 
+
+   ```js
+   {
+     "UUID": "BYTES32",
+     "imageBase64": "CAPTCHA IMAGE"
+   }
+   ```
+
+   > The UUID and hashed CAPTCHA answer are stored in the AWS Redis.
+
+2. User sends the transaction to the `Boba Faucet` contract with UUID and CAPTCHA answer
+
+   ```javascript
+   const BobaFaucet = new ethers.Contract(
+     BOBA_FAUCET_CONTRACE_ADDRESS,
+     BobaFaucetJson.abi,
+     this.provider.getSigner()
+   )
+   const tx = await BobaFaucet.getBobaFaucet(uuid, answer)
+   await tx.wait()
+   ```
+
+3. Geth sends the request to the backend and retrieves the result
+
+   >  The answer is hashed in the `Boba Faucet` contract first before sending it to backend API.
+   >
+   > ```
+   > bytes32 hashedKey = keccak256(abi.encodePacked(_key));
+   > bytes memory encRequest = abi.encodePacked(_uuid, hashedKey);
+   > bytes memory encResponse = turing.TuringTx(turingUrl, encRequest);
+   > ```
+
+   The POST request is sent to `https://api-turing.boba.network/verify.captcha` . It decodes the input and verifies the UUID with the hashed answer.
+
+   ```python
+   paramsHexString = body['params'][0]
+   # Select uuid and answer
+   # paramsHexString[0: 66] is the length of input data
+   uuid = '0x' + paramsHexString[66: 130]
+   answer = '0x' + paramsHexString[130:]
+   # Get answer from Redis
+   keyInRedis = db.get(uuid)
+   # Return the payload
+   return returnPayload(keyInRedis.decode('utf-8') == key)
+   
+   # Payload is built based on the result
+   def returnPayload(result):
+       # We return 0 or 1 using uint256
+       payload = '0x' + '{0:0{1}x}'.format(int(32), 64)
+       if result:
+           # Add UINT256 1 if the result is correct
+           payload += '{0:0{1}x}'.format(int(1), 64)
+       else:
+           # Add UINT256 0 if the result is wrong
+           payload += '{0:0{1}x}'.format(int(0), 64)
+   
+       returnPayload = {
+           'statusCode': 200,
+           'body': json.dumps({ 'result': payload })
+       }
+   
+       return returnPayload
+   ```
+
 4. Geth atomically revises the calldata
-5. User gets the result
-<img width="873" alt="image" src="https://user-images.githubusercontent.com/46272347/153475813-f4ffd103-3b95-4df7-a951-a321b84ff34a.png">
+
+   On the contract level, we only need to decode the result from the Turing request and release the funds if the answer is correct.
+
+   ```solidity
+   // Decode the response from outside API
+   bytes memory encResponse = turing.TuringTx(turingUrl, encRequest);
+   uint256 result = abi.decode(encResponse,(uint256));
+   // Release the funds if it is correct
+   require(result == 1, 'Invalid key and UUID');
+   IERC20(BobaAddress).safeTransfer(msg.sender, BobaFaucetAmount);
+   ```
+
+5. User gets the funds if the answer is correct or the error message
+   <img width="873" alt="image" src="https://user-images.githubusercontent.com/46272347/153475813-f4ffd103-3b95-4df7-a951-a321b84ff34a.png">
 
 ## Implementation
 
