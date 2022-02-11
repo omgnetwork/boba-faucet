@@ -1,6 +1,7 @@
 # Boba Faucet
 
 - [Overview](#Overview)
+- [Directory Structure](#Directory-Structure)
 - [Specification](#Specification)
 - [Impementation](#Implementaion)
   * [Step 1: Creating API endpoints](#Step1--Creating-API-endpoints)
@@ -12,6 +13,14 @@
 Boba Faucet is a system for getting Boba Rinkeby ETH and Boba Rinkeby Boba Token. It's implemented using the Turing. Turing is a system for interacting with the outside world from within solidity smart contracts.
 
 Before claiming the token, users have to answer the CAPTCHA. The answer is hashed and compared off-chain via Turing. Once the answer is verified, the smart contract releases the funds.
+
+## Directory Structure
+
+* [`packages`](./packages): Contains all the typescript packages and contracts
+  * [`contracts`](./packages/contracts): Solidity smart contracts implementing the Boba Faucet
+  * [`gateway`](./packages/gate): The Boba Web faucet
+  * [`deployment`](./packages/deployment): Boba faucet contract addresses
+  * [`api`](./packages/api): Boba faucet backend API
 
 ## Specification
 
