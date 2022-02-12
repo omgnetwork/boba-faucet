@@ -44,8 +44,10 @@ function Faucet() {
             }
             dispatch(openError(error))
             dispatch(getCAPTCHAImage())
+            setKey('')
         } else {
             dispatch(openAlert(`${value === 1 ? '10 test BOBA' : '0.1 test ETH'} was sent to your wallet`))
+            dispatch(getCAPTCHAImage())
             setKey('')
         }
         setLoading(false)
