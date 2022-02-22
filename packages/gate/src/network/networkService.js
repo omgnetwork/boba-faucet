@@ -130,7 +130,6 @@ class NetworkService {
 
     async verifyCAPTCHAImage(token, uuid, key) {
         try {
-            console.log(BOBA_FAUCET_CONTRACE_ADDRESS, BobaFaucetJson.abi)
             const BobaFaucet = new ethers.Contract(
                 BOBA_FAUCET_CONTRACE_ADDRESS,
                 BobaFaucetJson.abi,
@@ -138,12 +137,16 @@ class NetworkService {
             )
             // Request Boba
             if (token === 1) {
-                const tx = await BobaFaucet.getBobaFaucet(uuid, key)
-                await tx.wait()
+                const gas = await BobaFaucet.estimateGas.getBobaFaucet(uuid, key)
+                console.log({ "gas getBobaFaucet": gas.toString()})
+                const tx2 = await BobaFaucet.getBobaFaucet(uuid, key, { gasLimit: 3000000 })
+                await tx2.wait()
             }
             // Request ETH
             if (token === 2) {
-                const tx = await BobaFaucet.getETHFaucet(uuid, key)
+                const gas = await BobaFaucet.estimateGas.getETHFaucet(uuid, key)
+                console.log({ "gas getETHFaucet": gas.toString()})
+                const tx = await BobaFaucet.getETHFaucet(uuid, key, { gasLimit: 3000000 })
                 await tx.wait()
             }
             return { error: false }

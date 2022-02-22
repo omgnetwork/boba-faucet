@@ -60,7 +60,7 @@ const deployFn: DeployFunction = async (hre) => {
 
     BobaFaucet = await Factory__BobaFaucet.deploy(
         TuringHelper.address,
-        'https://bfx0hsojl5.execute-api.us-east-1.amazonaws.com/prod/post.captcha',
+        'https://api-turing.boba.network/post.captcha',
         L2BobaToken.address,
         86400, // 24 hours 24 * 60 * 60
         utils.parseEther('10'),
