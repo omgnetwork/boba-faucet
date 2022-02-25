@@ -138,12 +138,14 @@ class NetworkService {
             )
             // Request Boba
             if (token === 1) {
-                const tx = await BobaFaucet.getBobaFaucet(uuid, key)
+                await BobaFaucet.estimateGas.getETHFaucet(uuid, key)
+                const tx = await BobaFaucet.getBobaFaucet(uuid, key, {gasLimit: 300000})
                 await tx.wait()
             }
             // Request ETH
             if (token === 2) {
-                const tx = await BobaFaucet.getETHFaucet(uuid, key)
+                await BobaFaucet.estimateGas.getETHFaucet(uuid, key)
+                const tx = await BobaFaucet.getETHFaucet(uuid, key, {gasLimit: 300000})
                 await tx.wait()
             }
             return { error: false }
